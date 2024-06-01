@@ -101,18 +101,18 @@ impl Shader {
                 if success == 0 {
                     gl::GetShaderInfoLog(object, 1024, ptr::null_mut() as _, ptr::addr_of_mut!(info_log) as _);
                     let info_log_vec: Vec<_> = Vec::from(info_log).iter().map(|it| *it as u8).collect();
-                    println!("| ERROR::SHADER: Compile-time error: Type: {}", type_str);
-                    println!("{}", String::from_utf8(info_log_vec).unwrap());
-                    println!(" -- --------------------------------------------------- -- ");
+                    log::error!("| ERROR::SHADER: Compile-time error: Type: {}", type_str);
+                    log::error!("{}", String::from_utf8(info_log_vec).unwrap());
+                    log::error!(" -- --------------------------------------------------- -- ");
                 }
             } else {
                 gl::GetProgramiv(object, gl::LINK_STATUS, &mut success);
                 if success == 0 {
                     gl::GetShaderInfoLog(object, 1024, ptr::null_mut() as _, ptr::addr_of_mut!(info_log) as _);
                     let info_log_vec: Vec<_> = Vec::from(info_log).iter().map(|it| *it as u8).collect();
-                    println!("| ERROR::Shader: Link-time error: Type: {}", type_str);
-                    println!("{}", String::from_utf8(info_log_vec).unwrap());
-                    println!(" -- --------------------------------------------------- -- ");
+                    log::error!("| ERROR::Shader: Link-time error: Type: {}", type_str);
+                    log::error!("{}", String::from_utf8(info_log_vec).unwrap());
+                    log::error!(" -- --------------------------------------------------- -- ");
                 }
             }
         }

@@ -94,13 +94,13 @@ impl TextRenderer {
             // then initialize and load the FreeType library
             let mut ft: FT_Library = ptr::null_mut();
             if FT_Init_FreeType(&mut ft) != 0 { // all functions return a value different than 0 whenever an error occurred
-                println!("ERROR::FREETYPE: Could not init FreeType Library");
+                log::error!("ERROR::FREETYPE: Could not init FreeType Library");
             }
             // load font as face
             let mut face: FT_Face = ptr::null_mut();
             let font = CString::new(font).unwrap();
             if FT_New_Face(ft, font.as_ptr(), 0, &mut face) != 0 {
-                println!("ERROR::FREETYPE: Failed to load font");
+                log::error!("ERROR::FREETYPE: Failed to load font");
             }
             // set size to load glyphs as
             FT_Set_Pixel_Sizes(face, 0, font_size);
@@ -110,7 +110,7 @@ impl TextRenderer {
             for c in 0u8..128 { // lol see what I did there
                 // load character glyph
                 if FT_Load_Char(face, c as _, FT_LOAD_RENDER as _) != 0 {
-                    println!("ERROR::FREETYTPE: Failed to load Glyph");
+                    log::error!("ERROR::FREETYTPE: Failed to load Glyph");
                     continue;
                 }
                 // generate texture

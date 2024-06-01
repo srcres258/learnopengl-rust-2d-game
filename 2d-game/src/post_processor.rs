@@ -76,14 +76,14 @@ impl PostProcessor {
             gl::RenderbufferStorageMultisample(gl::RENDERBUFFER, 4, gl::RGB, width as _, height as _); // allocate storage for render buffer object
             gl::FramebufferRenderbuffer(gl::FRAMEBUFFER, gl::COLOR_ATTACHMENT0, gl::RENDERBUFFER, result.rbo); // attach MS render buffer object to framebuffer
             if gl::CheckFramebufferStatus(gl::FRAMEBUFFER) != gl::FRAMEBUFFER_COMPLETE {
-                println!("ERROR::POSTPROCESSOR: Failed to initialize MSFBO");
+                log::error!("ERROR::POSTPROCESSOR: Failed to initialize MSFBO");
             }
             // also initialize the FBO/texture to blit multisampled color-buffer to; used for shader operations (for postprocessing effects)
             gl::BindFramebuffer(gl::FRAMEBUFFER, result.fbo);
             result.texture.generate(width, height, &[]);
             gl::FramebufferTexture2D(gl::FRAMEBUFFER, gl::COLOR_ATTACHMENT0, gl::TEXTURE_2D, result.texture.id, 0); // attach texture to framebuffer as its color attachment
             if gl::CheckFramebufferStatus(gl::FRAMEBUFFER) != gl::FRAMEBUFFER_COMPLETE {
-                println!("ERROR::POSTPROCESSOR: Failed to initialize FBO");
+                log::error!("ERROR::POSTPROCESSOR: Failed to initialize FBO");
             }
             gl::BindFramebuffer(gl::FRAMEBUFFER, 0);
             // initialize render data and uniforms

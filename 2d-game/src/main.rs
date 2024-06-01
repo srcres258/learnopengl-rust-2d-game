@@ -41,57 +41,59 @@ const SCREEN_HEIGHT: u32 = 600;
 
 static mut GAME_OBJ_PTR: *mut Game = ptr::null_mut();
 
-extern "system" fn gl_debug_output(source: GLenum,
-                                   gltype: GLenum,
-                                   id: GLuint,
-                                   severity: GLenum,
-                                   _length: GLsizei,
-                                   message: *const GLchar,
-                                   _user_param: *mut c_void)
-{
+extern "system" fn gl_debug_output(
+    source: GLenum,
+    gltype: GLenum,
+    id: GLuint,
+    severity: GLenum,
+    _length: GLsizei,
+    message: *const GLchar,
+    _user_param: *mut c_void
+) {
     if id == 131169 || id == 131185 || id == 131218 || id == 131204 { // ignore these non-significant error codes
         return;
     }
 
-    println!("---------------");
     let message_c_str;
     unsafe {
         message_c_str = CStr::from_ptr(message);
     }
     let message_str = message_c_str.to_str().unwrap();
-    println!("Debug message ({}): {}", id, message_str);
+    log::info!("Debug message ({}): {}", id, message_str);
     match source {
-        gl::DEBUG_SOURCE_API => println!("Source: API"),
-        gl::DEBUG_SOURCE_WINDOW_SYSTEM => println!("Source: Window System"),
-        gl::DEBUG_SOURCE_SHADER_COMPILER => println!("Source: Shader Compiler"),
-        gl::DEBUG_SOURCE_THIRD_PARTY => println!("Source: Third Party"),
-        gl::DEBUG_SOURCE_APPLICATION => println!("Source: Application"),
-        gl::DEBUG_SOURCE_OTHER => println!("Source: Other"),
+        gl::DEBUG_SOURCE_API => log::info!("Source: API"),
+        gl::DEBUG_SOURCE_WINDOW_SYSTEM => log::info!("Source: Window System"),
+        gl::DEBUG_SOURCE_SHADER_COMPILER => log::info!("Source: Shader Compiler"),
+        gl::DEBUG_SOURCE_THIRD_PARTY => log::info!("Source: Third Party"),
+        gl::DEBUG_SOURCE_APPLICATION => log::info!("Source: Application"),
+        gl::DEBUG_SOURCE_OTHER => log::info!("Source: Other"),
         _ => {}
     }
     match gltype {
-        gl::DEBUG_TYPE_ERROR => println!("Type: Error"),
-        gl::DEBUG_TYPE_DEPRECATED_BEHAVIOR => println!("Type: Deprecated Behaviour"),
-        gl::DEBUG_TYPE_UNDEFINED_BEHAVIOR => println!("Type: Undefined Behaviour"),
-        gl::DEBUG_TYPE_PORTABILITY => println!("Type: Portability"),
-        gl::DEBUG_TYPE_PERFORMANCE => println!("Type: Performance"),
-        gl::DEBUG_TYPE_MARKER => println!("Type: Marker"),
-        gl::DEBUG_TYPE_PUSH_GROUP => println!("Type: Push Group"),
-        gl::DEBUG_TYPE_POP_GROUP => println!("Type: Pop Group"),
-        gl::DEBUG_TYPE_OTHER => println!("Type: Other"),
+        gl::DEBUG_TYPE_ERROR => log::info!("Type: Error"),
+        gl::DEBUG_TYPE_DEPRECATED_BEHAVIOR => log::info!("Type: Deprecated Behaviour"),
+        gl::DEBUG_TYPE_UNDEFINED_BEHAVIOR => log::info!("Type: Undefined Behaviour"),
+        gl::DEBUG_TYPE_PORTABILITY => log::info!("Type: Portability"),
+        gl::DEBUG_TYPE_PERFORMANCE => log::info!("Type: Performance"),
+        gl::DEBUG_TYPE_MARKER => log::info!("Type: Marker"),
+        gl::DEBUG_TYPE_PUSH_GROUP => log::info!("Type: Push Group"),
+        gl::DEBUG_TYPE_POP_GROUP => log::info!("Type: Pop Group"),
+        gl::DEBUG_TYPE_OTHER => log::info!("Type: Other"),
         _ => {}
     }
     match severity {
-        gl::DEBUG_SEVERITY_HIGH => println!("Severity: high"),
-        gl::DEBUG_SEVERITY_MEDIUM => println!("Severity: medium"),
-        gl::DEBUG_SEVERITY_LOW => println!("Severity: low"),
-        gl::DEBUG_SEVERITY_NOTIFICATION => println!("Severity: notification"),
+        gl::DEBUG_SEVERITY_HIGH => log::info!("Severity: high"),
+        gl::DEBUG_SEVERITY_MEDIUM => log::info!("Severity: medium"),
+        gl::DEBUG_SEVERITY_LOW => log::info!("Severity: low"),
+        gl::DEBUG_SEVERITY_NOTIFICATION => log::info!("Severity: notification"),
         _ => {}
     }
-    println!();
+    log::info!("---------------");
 }
 
 fn main() {
+    env_logger::init();
+
     // glfw: initialize and configure
     // ------------------------------
     let mut glfw = glfw::init(glfw::fail_on_errors)
