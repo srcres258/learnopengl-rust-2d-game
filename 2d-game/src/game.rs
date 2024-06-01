@@ -513,16 +513,16 @@ impl Game {
     pub fn reset_level(&mut self) {
         match self.level {
             0 => {
-                self.levels[0].load("levels/one.lvl", self.width, self.height / 2);
+                self.levels[0].load("resources/levels/one.lvl", self.width, self.height / 2);
             }
             1 => {
-                self.levels[1].load("levels/two.lvl", self.width, self.height / 2);
+                self.levels[1].load("resources/levels/two.lvl", self.width, self.height / 2);
             }
             2 => {
-                self.levels[2].load("levels/three.lvl", self.width, self.height / 2);
+                self.levels[2].load("resources/levels/three.lvl", self.width, self.height / 2);
             }
             3 => {
-                self.levels[3].load("levels/four.lvl", self.width, self.height / 2);
+                self.levels[3].load("resources/levels/four.lvl", self.width, self.height / 2);
             }
             _ => {}
         }
