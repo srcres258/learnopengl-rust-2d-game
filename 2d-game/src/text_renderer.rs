@@ -62,7 +62,7 @@ impl TextRenderer {
         };
 
         // load and configure shader
-        resource_manager::load_shader(
+        result.text_shader = resource_manager::load_shader(
             filesystem::get_path("resources/shaders/text_2d.vs".to_string()).as_str(),
             filesystem::get_path("resources/shaders/text_2d.fs".to_string()).as_str(),
             None,
