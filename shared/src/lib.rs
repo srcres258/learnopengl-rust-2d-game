@@ -14,10 +14,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod shader_s;
 pub mod filesystem;
-pub mod shader_m;
 pub mod util;
-pub mod camera;
-pub mod shader;
-pub mod mesh;
