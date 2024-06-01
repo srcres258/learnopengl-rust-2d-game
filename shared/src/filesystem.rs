@@ -14,33 +14,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const LOGL_ROOT_PATH: &str = include_str!(concat!(env!("OUT_DIR"), "/git_repo_root_path.txt"));
-
-type Builder = Box<dyn Fn(String) -> String>;
+use std::env;
 
 pub fn get_path(path: String) -> String {
-    let path_builder = get_path_builder();
-    path_builder(path)
-}
-
-fn get_root() -> &'static str {
-    LOGL_ROOT_PATH
-}
-
-fn get_path_builder() -> Builder {
-    if get_root().len() == 0 {
-        Box::new(get_path_relative_binary)
-    } else {
-        Box::new(get_path_relative_root)
+    let mut cur_path = env::current_dir().expect("Failed to obtain current directory.");
+    let path_parts: Vec<&str> = path.as_str().split('/').collect();
+    for part in path_parts.iter() {
+        cur_path.push(part);
     }
-}
-
-fn get_path_relative_root(path: String) -> String {
-    format!("{}/{}", get_root(), path)
-}
-
-fn get_path_relative_binary(path: String) -> String {
-    format!("../../../{}", path)
+    cur_path.into_os_string().into_string().unwrap()
 }
 
 #[cfg(test)]
