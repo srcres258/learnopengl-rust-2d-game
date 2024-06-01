@@ -24,7 +24,7 @@ use freetype::freetype::{
     FT_Library, FT_Load_Char, FT_LOAD_RENDER, FT_New_Face,
     FT_Set_Pixel_Sizes
 };
-use learnopengl_shared::util;
+use learnopengl_shared::{filesystem, util};
 use crate::resource_manager;
 use crate::shader::Shader;
 
@@ -62,7 +62,12 @@ impl TextRenderer {
         };
 
         // load and configure shader
-        result.text_shader = resource_manager::load_shader("text_2d.vs", "text_2d.fs", None, "text".to_string());
+        resource_manager::load_shader(
+            filesystem::get_path("resources/shaders/text_2d.vs".to_string()).as_str(),
+            filesystem::get_path("resources/shaders/text_2d.fs".to_string()).as_str(),
+            None,
+            "text".to_string()
+        );
         result.text_shader.set_matrix4_ex("projection", &util::glm::ortho(0.0, width as _, height as _, 0.0), true);
         result.text_shader.set_integer("text", 0);
         unsafe {

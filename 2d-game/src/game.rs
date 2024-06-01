@@ -204,9 +204,24 @@ impl Game {
     // initialize game state (load all shaders/textures/levels)
     pub fn init(&mut self) {
         // load shaders
-        resource_manager::load_shader("sprite.vs", "sprite.fs", None, "sprite".to_string());
-        resource_manager::load_shader("particle.vs", "particle.fs", None, "particle".to_string());
-        resource_manager::load_shader("post_processing.vs", "post_processing.fs", None, "postprocessing".to_string());
+        resource_manager::load_shader(
+            filesystem::get_path("resources/shaders/sprite.vs".to_string()).as_str(),
+            filesystem::get_path("resources/shaders/sprite.fs".to_string()).as_str(),
+            None,
+            "sprite".to_string()
+        );
+        resource_manager::load_shader(
+            filesystem::get_path("resources/shaders/particle.vs".to_string()).as_str(),
+            filesystem::get_path("resources/shaders/particle.fs".to_string()).as_str(),
+            None,
+            "particle".to_string()
+        );
+        resource_manager::load_shader(
+            filesystem::get_path("resources/shaders/post_processing.vs".to_string()).as_str(),
+            filesystem::get_path("resources/shaders/post_processing.fs".to_string()).as_str(),
+            None,
+            "postprocessing".to_string()
+        );
         // configure shaders
         let projection = glm::ortho(0.0, self.width as f32, self.height as f32, 0.0, -1.0, 1.0);
         resource_manager::get_shader("sprite".to_string()).use_shader().set_integer("sprite", 0);
