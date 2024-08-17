@@ -16,6 +16,7 @@
 
 extern crate nalgebra_glm as glm;
 
+use std::time::Instant;
 use glfw::{Glfw, Key};
 use lazy_static::lazy_static;
 use rand::Rng;
@@ -99,6 +100,8 @@ pub struct Game {
     sound_engine: Option<Box<SoundEngine>>,
 
     shake_time: f32,
+    last_fps_shown: Instant,
+    fps: f32,
 
     glfw: Glfw
 }
@@ -210,6 +213,8 @@ impl Game {
             utf8_text: None,
             sound_engine: None,
             shake_time: 0.0,
+            last_fps_shown: Instant::now(),
+            fps: 0.0,
             glfw
         }
     }
@@ -369,6 +374,16 @@ impl Game {
     }
 
     pub fn update(&mut self, dt: f32) {
+        // update FPS
+        let dur = self.last_fps_shown.elapsed();
+        if dur.as_millis() >= 1000 {
+            if dt == 0.0 {
+                self.fps = 0.0
+            } else {
+                self.fps = 1.0 / dt;
+            }
+            self.last_fps_shown = Instant::now();
+        }
         // update objects
         self.ball.as_mut().unwrap().move_ball(dt, self.width);
         // check for collisions
@@ -439,6 +454,9 @@ impl Game {
             // render text (don't include in postprocessing)
             let string = t!("game_state.lives", count=self.lives).to_string();
             self.render_text(string, 5.0, 5.0, 1.0);
+            let fps = format!("{:.2}", self.fps);
+            let string = t!("game_state.fps", count=fps).to_string();
+            self.render_text(string, 5.0, 25.0, 1.0);
         }
         if self.state == GameState::Menu {
             self.render_text(t!("game_state.menu_0").to_string(), 250.0, self.height as f32 / 2.0, 1.0);
