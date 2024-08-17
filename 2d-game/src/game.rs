@@ -339,7 +339,7 @@ impl Game {
         if self.state == GameState::Win {
             if self.keys[Key::Enter as usize] {
                 self.keys_processed[Key::Enter as usize] = true;
-                self.effects.as_mut().unwrap().chaos = true;
+                self.effects.as_mut().unwrap().chaos = false;
                 self.state = GameState::Menu;
             }
         }
