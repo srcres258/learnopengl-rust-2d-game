@@ -14,6 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[macro_use]
+extern crate rust_i18n;
+
 use std::ffi::{c_void, CStr};
 use std::ptr;
 use gl::types::{GLchar, GLenum, GLsizei, GLuint};
@@ -33,6 +36,8 @@ pub mod particle_generator;
 pub mod post_processor;
 pub mod text_renderer;
 pub mod sound_engine;
+
+i18n!("locales");
 
 // The Width of the screen
 const SCREEN_WIDTH: u32 = 800;

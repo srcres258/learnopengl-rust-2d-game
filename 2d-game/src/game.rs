@@ -19,6 +19,7 @@ extern crate nalgebra_glm as glm;
 use glfw::{Glfw, Key};
 use lazy_static::lazy_static;
 use rand::Rng;
+use rust_i18n::t;
 use learnopengl_shared::{filesystem, util};
 use crate::ball_object::BallObject;
 use crate::game_level::GameLevel;
@@ -36,6 +37,7 @@ use crate::text_renderer::utf8::TextRenderer as UTF8TextRenderer;
 // Represents the current state of the game
 #[derive(PartialOrd, PartialEq)]
 pub enum GameState {
+    SelectLanguage,
     Active,
     Menu,
     Win
@@ -51,6 +53,11 @@ pub enum Direction {
 }
 // Defines a Collision typedef that represents collision data
 pub type Collision = (bool, Direction, glm::TVec2<f32>);
+
+pub enum Locale {
+    En = 0,
+    ZhCN = 1
+}
 
 // Initial size of the player paddle
 lazy_static! {
@@ -79,6 +86,7 @@ pub struct Game {
     pub power_ups: Vec<PowerUp>,
     pub level: u32,
     pub lives: u32,
+    pub locale: Locale,
 
     // Game-related State data
     renderer: Option<Box<SpriteRenderer>>,
@@ -183,7 +191,7 @@ impl Game {
     // constructor
     pub fn new(glfw: Glfw, width: u32, height: u32) -> Self {
         Self {
-            state: GameState::Menu,
+            state: GameState::SelectLanguage,
             keys: [false; 1024],
             keys_processed: [false; 1024],
             width,
@@ -192,6 +200,7 @@ impl Game {
             power_ups: Vec::new(),
             level: 0,
             lives: 3,
+            locale: Locale::En,
             renderer: None,
             player: None,
             ball: None,
@@ -295,6 +304,20 @@ impl Game {
 
     // game loop
     pub fn process_input(&mut self, dt: f32) {
+        if self.state == GameState::SelectLanguage {
+            if self.keys[Key::Num1 as usize] && !self.keys_processed[Key::Num1 as usize] {
+                rust_i18n::set_locale("en");
+                self.locale = Locale::En;
+                self.state = GameState::Menu;
+                self.keys_processed[Key::Num1 as usize] = true;
+            }
+            if self.keys[Key::Num2 as usize] && !self.keys_processed[Key::Num2 as usize] {
+                rust_i18n::set_locale("zh-CN");
+                self.locale = Locale::ZhCN;
+                self.state = GameState::Menu;
+                self.keys_processed[Key::Num2 as usize] = true;
+            }
+        }
         if self.state == GameState::Menu {
             if self.keys[Key::Enter as usize] && !self.keys_processed[Key::Enter as usize] {
                 self.state = GameState::Active;
@@ -414,16 +437,21 @@ impl Game {
             // render postprocessing quad
             self.effects.as_ref().unwrap().render(self.glfw.get_time() as f32);
             // render text (don't include in postprocessing)
-            let string = format!("Lives:{}", self.lives);
+            let string = t!("game_state.lives", count=self.lives).to_string();
             self.render_text(string, 5.0, 5.0, 1.0);
         }
         if self.state == GameState::Menu {
-            self.render_text("Press ENTER to start".to_string(), 250.0, self.height as f32 / 2.0, 1.0);
-            self.render_text("Press W or S to select level".to_string(), 245.0, self.height as f32 / 2.0 + 20.0, 0.75);
+            self.render_text(t!("game_state.menu_0").to_string(), 250.0, self.height as f32 / 2.0, 1.0);
+            self.render_text(t!("game_state.menu_1").to_string(), 245.0, self.height as f32 / 2.0 + 20.0, 0.75);
         }
         if self.state == GameState::Win {
-            self.render_text_ex("You WON!!!".to_string(), 320.0, self.height as f32 / 2.0 - 20.0, 1.0, glm::vec3(0.0, 1.0, 0.0));
-            self.render_text_ex("Press ENTER to retry or ESC to quit".to_string(), 130.0, self.height as f32 / 2.0, 1.0, glm::vec3(1.0, 1.0, 0.0));
+            self.render_text_ex(t!("game_state.win_0").to_string(), 320.0, self.height as f32 / 2.0 - 20.0, 1.0, glm::vec3(0.0, 1.0, 0.0));
+            self.render_text_ex(t!("game_state.win_1").to_string(), 130.0, self.height as f32 / 2.0, 1.0, glm::vec3(1.0, 1.0, 0.0));
+        }
+        if self.state == GameState::SelectLanguage {
+            self.render_text(t!("game_state.select_language_0").to_string(), 250.0, self.height as f32 / 2.0, 1.0);
+            self.render_text(t!("game_state.select_language_1").to_string(), 245.0, self.height as f32 / 2.0 + 20.0, 0.75);
+            self.render_text(t!("game_state.select_language_2").to_string(), 245.0, self.height as f32 / 2.0 + 40.0, 0.75);
         }
     }
 
@@ -683,10 +711,13 @@ impl Game {
         y: f32,
         scale: f32
     ) {
-        if *rust_i18n::locale() == *"zh-CN" {
-            self.utf8_text.as_ref().unwrap().render_text(text, x, y, scale);
-        } else {
-            self.text.as_ref().unwrap().render_text(text, x, y, scale);
+        match self.locale {
+            Locale::En => {
+                self.text.as_ref().unwrap().render_text(text, x, y, scale);
+            }
+            Locale::ZhCN => {
+                self.utf8_text.as_ref().unwrap().render_text(text, x, y, scale);
+            }
         }
     }
 
@@ -698,10 +729,13 @@ impl Game {
         scale: f32,
         color: glm::TVec3<f32>
     ) {
-        if *rust_i18n::locale() == *"zh-CN" {
-            self.utf8_text.as_ref().unwrap().render_text_ex(text, x, y, scale, color);
-        } else {
-            self.text.as_ref().unwrap().render_text_ex(text, x, y, scale, color);
+        match self.locale {
+            Locale::En => {
+                self.text.as_ref().unwrap().render_text_ex(text, x, y, scale, color);
+            }
+            Locale::ZhCN => {
+                self.utf8_text.as_ref().unwrap().render_text_ex(text, x, y, scale, color);
+            }
         }
     }
 }

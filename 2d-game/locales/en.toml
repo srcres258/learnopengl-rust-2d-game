@@ -1,0 +1,11 @@
+_version = 1
+
+[game_state]
+menu_0 = "Press ENTER to start"
+menu_1 = "Press W or S to select level"
+win_0 = "You WON!!!"
+win_1 = "Press ENTER to retry or ESC to quit"
+select_language_0 = "Select Language:"
+select_language_1 = "Press 1 for English"
+select_language_2 = "Press 2 for Chinese"
+lives = "Lives:%{count}"

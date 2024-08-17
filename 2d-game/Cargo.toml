@@ -17,3 +17,8 @@ log.workspace = true
 env_logger.workspace = true
 rust-i18n.workspace = true
 learnopengl-shared = { path = "../shared" }
+
+[package.metadata.i18n]
+available-locales = ["en", "zh-CN"]
+default-locale = "en"
+load-path = "locales"
