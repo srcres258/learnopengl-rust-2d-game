@@ -29,7 +29,9 @@ use crate::power_up::PowerUp;
 use crate::resource_manager;
 use crate::sound_engine::SoundEngine;
 use crate::sprite_renderer::SpriteRenderer;
-use crate::text_renderer::TextRenderer;
+use crate::text_renderer::ascii::TextRenderer;
+use crate::text_renderer::ITextRenderer;
+use crate::text_renderer::utf8::TextRenderer as UTF8TextRenderer;
 
 // Represents the current state of the game
 #[derive(PartialOrd, PartialEq)]
@@ -85,6 +87,7 @@ pub struct Game {
     particles: Option<Box<ParticleGenerator>>,
     effects: Option<Box<PostProcessor>>,
     text: Option<Box<TextRenderer>>,
+    utf8_text: Option<Box<UTF8TextRenderer>>,
     sound_engine: Option<Box<SoundEngine>>,
 
     shake_time: f32,
@@ -195,6 +198,7 @@ impl Game {
             particles: None,
             effects: None,
             text: None,
+            utf8_text: None,
             sound_engine: None,
             shake_time: 0.0,
             glfw
@@ -255,6 +259,10 @@ impl Game {
         text.load(filesystem::get_path("resources/fonts/OCRAEXT.TTF".to_string()), 24);
         let text = Box::new(text);
         self.text = Some(text);
+        let utf8_text = UTF8TextRenderer::new(self.width, self.height);
+        utf8_text.load(filesystem::get_path("resources/fonts/OPPOSans-Regular.ttf".to_string()), 24);
+        let utf8_text = Box::new(utf8_text);
+        self.utf8_text = Some(utf8_text);
         // load levels
         let mut one = GameLevel::new();
         one.load(filesystem::get_path("resources/levels/one.lvl".to_string()).as_str(), self.width, self.height / 2);
@@ -407,15 +415,15 @@ impl Game {
             self.effects.as_ref().unwrap().render(self.glfw.get_time() as f32);
             // render text (don't include in postprocessing)
             let string = format!("Lives:{}", self.lives);
-            self.text.as_ref().unwrap().render_text(string, 5.0, 5.0, 1.0);
+            self.render_text(string, 5.0, 5.0, 1.0);
         }
         if self.state == GameState::Menu {
-            self.text.as_ref().unwrap().render_text("Press ENTER to start".to_string(), 250.0, self.height as f32 / 2.0, 1.0);
-            self.text.as_ref().unwrap().render_text("Press W or S to select level".to_string(), 245.0, self.height as f32 / 2.0 + 20.0, 0.75);
+            self.render_text("Press ENTER to start".to_string(), 250.0, self.height as f32 / 2.0, 1.0);
+            self.render_text("Press W or S to select level".to_string(), 245.0, self.height as f32 / 2.0 + 20.0, 0.75);
         }
         if self.state == GameState::Win {
-            self.text.as_ref().unwrap().render_text_ex("You WON!!!".to_string(), 320.0, self.height as f32 / 2.0 - 20.0, 1.0, glm::vec3(0.0, 1.0, 0.0));
-            self.text.as_ref().unwrap().render_text_ex("Press ENTER to retry or ESC to quit".to_string(), 130.0, self.height as f32 / 2.0, 1.0, glm::vec3(1.0, 1.0, 0.0));
+            self.render_text_ex("You WON!!!".to_string(), 320.0, self.height as f32 / 2.0 - 20.0, 1.0, glm::vec3(0.0, 1.0, 0.0));
+            self.render_text_ex("Press ENTER to retry or ESC to quit".to_string(), 130.0, self.height as f32 / 2.0, 1.0, glm::vec3(1.0, 1.0, 0.0));
         }
     }
 
@@ -667,6 +675,35 @@ impl Game {
             }
         }
     }
+
+    fn render_text(
+        &self,
+        text: String,
+        x: f32,
+        y: f32,
+        scale: f32
+    ) {
+        if *rust_i18n::locale() == *"zh-CN" {
+            self.utf8_text.as_ref().unwrap().render_text(text, x, y, scale);
+        } else {
+            self.text.as_ref().unwrap().render_text(text, x, y, scale);
+        }
+    }
+
+    fn render_text_ex(
+        &self,
+        text: String,
+        x: f32,
+        y: f32,
+        scale: f32,
+        color: glm::TVec3<f32>
+    ) {
+        if *rust_i18n::locale() == *"zh-CN" {
+            self.utf8_text.as_ref().unwrap().render_text_ex(text, x, y, scale, color);
+        } else {
+            self.text.as_ref().unwrap().render_text_ex(text, x, y, scale, color);
+        }
+    }
 }
 
 impl Drop for Game {
@@ -688,6 +725,9 @@ impl Drop for Game {
             drop(it);
         }
         if let Some(it) = self.text.take() {
+            drop(it);
+        }
+        if let Some(it) = self.utf8_text.take() {
             drop(it);
         }
         if let Some(it) = self.sound_engine.take() {
